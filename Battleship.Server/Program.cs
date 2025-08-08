@@ -30,7 +30,7 @@ app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Battleship API V1");
-    c.RoutePrefix = string.Empty;  // <-- This makes Swagger UI open at "/"
+    c.RoutePrefix = string.Empty;  // Swagger UI served at "/"
 });
 
 app.MapBlazorHub();
@@ -49,5 +49,9 @@ api.MapPost("/board/{id}/attack", (Guid id, Position pos, GameService service) =
     var result = service.Attack(id, pos);
     return result is null ? Results.NotFound() : Results.Ok(result);
 });
+
+// Read port from environment or use 5000 as default
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+app.Urls.Add($"http://*:{port}");
 
 app.Run();
