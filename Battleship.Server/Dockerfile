@@ -1,24 +1,27 @@
-# Use official .NET SDK image to build the app
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+# Set default .NET version to 7.0 (override with build args as needed)
+ARG DOTNET_VERSION=7.0
+
+# Stage 1: Build the app
+FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION} AS build
+ARG DOTNET_VERSION
 WORKDIR /app
 
-# Copy csproj and restore as distinct layers
+# Copy csproj and restore as separate layers
 COPY *.csproj ./
 RUN dotnet restore
 
-# Copy everything else and build
+# Copy everything else and publish
 COPY . ./
-RUN dotnet publish -c Release -o out
+RUN dotnet publish -f net${DOTNET_VERSION} -c Release -o /app/out
 
-# Use official ASP.NET runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS runtime
+# Stage 2: Runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION} AS runtime
 WORKDIR /app
+
 COPY --from=build /app/out ./
 
-# Expose port (match your app's listening port)
 EXPOSE 5000
 
-# Set environment variables for ASP.NET Core
 ENV ASPNETCORE_URLS=http://+:5000
 ENV DOTNET_RUNNING_IN_CONTAINER=true
 
