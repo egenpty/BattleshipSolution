@@ -132,4 +132,8 @@ api.MapPost("/board/{id}/attack", (Guid id, Position pos, GameService service) =
     return result is null ? Results.NotFound() : Results.Ok(result);
 });
 
+// Read port from environment or default to 5000
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+app.Urls.Add($"http://*:{port}");
+
 app.Run();
