@@ -1,98 +1,141 @@
 ﻿# Battleship State Tracker API
 
-    Overview
-    This project implements a Battleship game state tracker API in C# using ASP.NET Core. 
-    It focuses on managing the game state for a single player board — creating boards, placing ships, and processing attacks.
+Overview
+This project implements a Battleship game state tracker API in C# using ASP.NET Core. 
+It focuses on managing the game state for a single player board — creating boards, placing ships, and processing attacks.
 
-    No UI or persistent storage is included; the API manages state in-memory. 
-    This project demonstrates modern coding practices, clean architecture, logging, and automated testing.
+No UI or persistent storage is included; the API manages state in-memory. 
+This project demonstrates modern coding practices, clean architecture, logging, and automated testing.
 
 ## Features
 
-    - Create a 10x10 Battleship board (configurable size)
-    - Add ships with horizontal or vertical placement; validation prevents overlap or out-of-bounds placement
-    - Process attacks on board positions, returning hit/miss and sunk ship status
-    - Maintain immutable, encapsulated data structures for positions, ships, and attacks
-    - Comprehensive unit tests covering core game logic and edge cases
-    - Structured logging at both service and domain model layers for observability
-    - Configuration using environment-specific JSON files for production readiness
+- Create a 10x10 Battleship board (configurable size)  
+- Add ships with horizontal or vertical placement; validation prevents overlap or out-of-bounds placement  
+- Process attacks on board positions, returning hit/miss and sunk ship status  
+- Maintain immutable, encapsulated data structures for positions, ships, and attacks  
+- Comprehensive unit tests covering core game logic and edge cases  
+- Structured logging at both service and domain model layers for observability  
+- Configuration using environment-specific JSON files for production readiness  
 
 ## Project Structure
 
-    - Models
-        Contains core domain models: Board, Ship, Position, AttackResult
-        Encapsulates validation, hit detection, and state mutation logic
-    - Data
-        Contains GameService and in-memory GameStateStore managing multiple boards
-    - Tests
-        Unit tests for GameService and domain logic using xUnit
-    - Program.cs
-        Application startup, dependency injection, logging configuration
+- **Models**  
+  Contains core domain models: Board, Ship, Position, AttackResult  
+  Encapsulates validation, hit detection, and state mutation logic  
+- **Data**  
+  Contains GameService and in-memory GameStateStore managing multiple boards  
+- **Tests**  
+  Unit tests for GameService and domain logic using xUnit  
+- **Program.cs**  
+  Application startup, dependency injection, logging configuration  
 
 ## Getting Started
 
 ### Prerequisites
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
-- Visual Studio 2022 or later (with ASP.NET and web development workload)
+- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)  
+- Visual Studio 2022 or later (with ASP.NET and web development workload)  
 
 ### Running the Project
 
-1. Clone or download the repository
-2. Open `BattleshipSolution.sln` or `Battleship.Server\Battleship.Server.csproj` in Visual Studio 2022
-3. Build and run the project (F5)
-4. The app will launch at `http://localhost:{port}` (port will vary)
+1. Clone or download the repository  
+2. Open `BattleshipSolution.sln` or `Battleship.Server\Battleship.Server.csproj` in Visual Studio 2022  
+3. Build and run the project (F5)  
+4. The app will launch at `http://localhost:{port}` (port will vary)  
 
 ### Testing the API (Swagger)
 
-Swagger UI is available at:
-
-http://localhost:{port}/swagger
-
+Swagger UI is available at:  
+`http://localhost:{port}/swagger`
 
 Replace `{port}` with the port shown in your console or Visual Studio output.
 
+---
+
+### How to Login and Use JWT Authentication in Swagger
+
+The Battleship API uses JWT Bearer tokens to protect its `/api/*` endpoints. To test these endpoints in Swagger, follow these steps:
+
+1. **Login to get JWT token**  
+   - In Swagger UI, expand the **`POST /login`** endpoint under the **Auth** section.  
+   - Click **Try it out** and enter the following JSON in the request body:
+
+     ```json
+     {
+       "username": "user",
+       "password": "password"
+     }
+     ```
+
+   - Click **Execute** to send the request.  
+   - The response will include a JWT token string, for example:
+
+     ```json
+     {
+       "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+     }
+     ```
+
+2. **Authorize Swagger with the JWT token**  
+   - Click the **Authorize** button (top right in Swagger UI).  
+   - In the popup, enter the token with the `Bearer ` prefix, like this:
+
+     ```
+     Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+     ```
+
+   - Click **Authorize** and then **Close**.
+
+3. **Call protected endpoints**  
+   - Now when you execute any endpoint under `/api/*` (e.g., `POST /api/board`), 
+   - Swagger will send the JWT token in the `Authorization` header automatically.  
+   - You should receive successful responses if your token is valid.
+
+---
+
 ## Configuration
 
-    Logging and environment settings are managed via:
-        appsettings.json — base config
-        appsettings.Development.json — dev overrides (verbose logging)
-        appsettings.Production.json — production overrides (reduced logging)
+Logging and environment settings are managed via:
 
-    Set environment variable ASPNETCORE_ENVIRONMENT to switch config:
-        Development for local dev
-        Production for production environment
+- `appsettings.json` — base config  
+- `appsettings.Development.json` — dev overrides (verbose logging)  
+- `appsettings.Production.json` — production overrides (reduced logging)  
+
+Set environment variable `ASPNETCORE_ENVIRONMENT` to switch config:
+
+- `Development` for local dev  
+- `Production` for production environment  
 
 ## Logging
 
-    - Uses ILogger injected into GameService and Board for detailed event logging
-    - Logs include board creation, ship placements, attacks, hits, misses, and errors
-    - By default logs to console; configuration can be extended for file or centralized logging
+- Uses `ILogger` injected into `GameService` and `Board` for detailed event logging  
+- Logs include board creation, ship placements, attacks, hits, misses, and errors  
+- By default logs to console; configuration can be extended for file or centralized logging  
 
 ## Testing
 
-    - Board creation (BoardTests and GameServiceTests)
-    - Ship placement validation (BoardTests and ShipTests)
-    - Attack results and sunk ship detection (BoardTests, ShipTests, and GameServiceTests)
-    - Edge cases like repeated attacks and invalid positions (BoardTests and indirectly in service tests)
+- Board creation (`BoardTests` and `GameServiceTests`)  
+- Ship placement validation (`BoardTests` and `ShipTests`)  
+- Attack results and sunk ship detection (`BoardTests`, `ShipTests`, and `GameServiceTests`)  
+- Edge cases like repeated attacks and invalid positions (`BoardTests` and indirectly in service tests)  
 
 ## Available endpoints:
 
 - `POST /api/board`  
-    Creates a new board. Response includes a unique board `Id`.
+  Creates a new board. Response includes a unique board `Id`.
 
 - `POST /api/board/{id}/ship`  
-    Add a battleship to the board with JSON body specifying positions.  
-    Example:
+  Add a battleship to the board with JSON body specifying positions.  
+  Example:
 
-      ```json
-      {
-        "positions": [
-          { "x": 2, "y": 3 },
-          { "x": 3, "y": 3 },
-          { "x": 4, "y": 3 }
-        ]
-      }
+  ```json
+  {
+    "positions": [
+      { "x": 2, "y": 3 },
+      { "x": 3, "y": 3 },
+      { "x": 4, "y": 3 }
+    ]
+  }
 
 - `POST /api/board/{id}/attack`
     Attack a position on the board.
