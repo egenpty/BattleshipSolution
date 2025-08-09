@@ -124,8 +124,13 @@ var api = app.MapGroup("/api").RequireAuthorization();
 api.MapPost("/board", (GameService service) => service.CreateBoard());
 api.MapPost("/board/{id}/ship", (Guid id, Ship ship, GameService service) =>
 {
-    return service.AddShip(id, ship) ? Results.Ok() : Results.BadRequest("Invalid ship placement.");
+    var response = service.AddShip(id, ship);
+    if (response.Success)
+        return Results.Ok(response);
+    else
+        return Results.BadRequest(response.Message);
 });
+
 api.MapPost("/board/{id}/attack", (Guid id, Position pos, GameService service) =>
 {
     var result = service.Attack(id, pos);
@@ -133,7 +138,7 @@ api.MapPost("/board/{id}/attack", (Guid id, Position pos, GameService service) =
 });
 
 // Read port from environment or default to 5000
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
-app.Urls.Add($"http://*:{port}");
+//var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+//app.Urls.Add($"http://*:{port}");
 
 app.Run();

@@ -54,7 +54,7 @@ public class GameServiceTests
 
         // Assert board is created and added to the store
         Assert.NotNull(board);
-        Assert.Contains(board.Id, store.Boards.Keys);
+        Assert.Contains(board.BoardId, store.Boards.Keys);
 
         // Verify that an informational log was written during board creation
         mockLogger.Verify(
@@ -72,32 +72,34 @@ public class GameServiceTests
     /// and the ship can be added successfully.
     /// </summary>
     [Fact]
-    public void AddShip_ShouldReturnTrue_WhenBoardExistsAndShipIsValid()
+    public void AddShip_ShouldReturnSuccess_WhenBoardExistsAndShipIsValid()
     {
         var store = CreateStore();
         var service = CreateService(store);
         var board = service.CreateBoard();
         var ship = CreateTestShip();
 
-        var result = service.AddShip(board.Id, ship);
+        var response = service.AddShip(board.BoardId, ship);
 
         // Assert the ship was successfully added
-        Assert.True(result);
-        Assert.Contains(ship, store.Boards[board.Id].Ships);
+        Assert.True(response.Success, "Expected AddShip to succeed.");
+        Assert.Contains(ship, store.Boards[board.BoardId].Ships);
     }
 
     /// <summary>
-    /// Tests that AddShip returns false when the board with the specified ID does not exist.
+    /// Tests that AddShip returns failure when the board with the specified ID does not exist.
     /// </summary>
     [Fact]
-    public void AddShip_ShouldReturnFalse_WhenBoardDoesNotExist()
+    public void AddShip_ShouldReturnFailure_WhenBoardDoesNotExist()
     {
         var service = CreateService();
         var ship = CreateTestShip();
+        var nonExistentBoardId = Guid.NewGuid();
 
-        var result = service.AddShip(Guid.NewGuid(), ship);
+        var response = service.AddShip(nonExistentBoardId, ship);
 
-        Assert.False(result);
+        Assert.False(response.Success, "Expected AddShip to fail when board does not exist.");
+        Assert.Equal($"AddShip failed: Board with ID {nonExistentBoardId} not found", response.Message);
     }
 
     /// <summary>
@@ -111,9 +113,9 @@ public class GameServiceTests
         var service = CreateService(store);
         var board = service.CreateBoard();
         var ship = CreateTestShip();
-        service.AddShip(board.Id, ship);
+        service.AddShip(board.BoardId, ship);
 
-        var result = service.Attack(board.Id, new Position(0, 0));
+        var result = service.Attack(board.BoardId, new Position(0, 0));
 
         Assert.NotNull(result);
         Assert.True(result!.Hit);
@@ -130,7 +132,7 @@ public class GameServiceTests
         var service = CreateService(store);
         var board = service.CreateBoard();
 
-        var result = service.Attack(board.Id, new Position(5, 5));
+        var result = service.Attack(board.BoardId, new Position(5, 5));
 
         Assert.NotNull(result);
         Assert.False(result!.Hit);
@@ -168,12 +170,12 @@ public class GameServiceTests
             new Position(4, 3)
         });
 
-        service.AddShip(board.Id, ship);
+        service.AddShip(board.BoardId, ship);
 
         // Step-by-step attacks
-        var result1 = service.Attack(board.Id, new Position(2, 3));
-        var result2 = service.Attack(board.Id, new Position(3, 3));
-        var result3 = service.Attack(board.Id, new Position(4, 3));
+        var result1 = service.Attack(board.BoardId, new Position(2, 3));
+        var result2 = service.Attack(board.BoardId, new Position(3, 3));
+        var result3 = service.Attack(board.BoardId, new Position(4, 3));
 
         Assert.NotNull(result1);
         Assert.True(result1!.Hit);
@@ -212,16 +214,16 @@ public class GameServiceTests
             new Position(7, 5)
         });
 
-        service.AddShip(board.Id, ship1);
-        service.AddShip(board.Id, ship2);
+        service.AddShip(board.BoardId, ship1);
+        service.AddShip(board.BoardId, ship2);
 
         // Attack all positions
-        var r1 = service.Attack(board.Id, new Position(1, 1)); // hit
-        var r2 = service.Attack(board.Id, new Position(1, 2)); // sunk
-        var r3 = service.Attack(board.Id, new Position(5, 5)); // hit
-        var r4 = service.Attack(board.Id, new Position(6, 5)); // hit
-        var r5 = service.Attack(board.Id, new Position(7, 5)); // sunk
-        var r6 = service.Attack(board.Id, new Position(9, 9)); // miss
+        var r1 = service.Attack(board.BoardId, new Position(1, 1)); // hit
+        var r2 = service.Attack(board.BoardId, new Position(1, 2)); // sunk
+        var r3 = service.Attack(board.BoardId, new Position(5, 5)); // hit
+        var r4 = service.Attack(board.BoardId, new Position(6, 5)); // hit
+        var r5 = service.Attack(board.BoardId, new Position(7, 5)); // sunk
+        var r6 = service.Attack(board.BoardId, new Position(9, 9)); // miss
 
         Assert.True(r1!.Hit);
         Assert.False(r1.Sunk);

@@ -16,26 +16,60 @@ public class GameService
         _boardLogger = boardLogger;
     }
 
-    public Board CreateBoard(int size = 10)
+    public BoardCreationResponse CreateBoard(int size = 10)
     {
+        if (size <= 0)
+        {
+            var message = $"Invalid board size: {size}. Must be greater than zero.";
+            _logger.LogWarning(message);
+            return new BoardCreationResponse
+            {
+                Success = false,
+                Message = message
+            };
+        }
+
         var board = new Board(size, _boardLogger);
         _store.Boards[board.Id] = board;
         _logger.LogInformation("Created new board with ID {BoardId} and size {Size}", board.Id, size);
-        return board;
+
+        return new BoardCreationResponse
+        {
+            Success = true,
+            Message = "Board created successfully.",
+            BoardId = board.Id,
+            Size = board.Size
+        };
     }
 
-    public bool AddShip(Guid boardId, Ship ship)
+    public AddShipResponse AddShip(Guid boardId, Ship ship)
     {
         if (!_store.Boards.TryGetValue(boardId, out var board))
         {
-            _logger.LogWarning("AddShip failed: Board with ID {BoardId} not found", boardId);
-            return false;
+            var msg = $"AddShip failed: Board with ID {boardId} not found";
+            _logger.LogWarning(msg);
+            return new AddShipResponse
+            {
+                Success = false,
+                Message = msg
+            };
         }
 
         var result = board.AddShip(ship);
-        _logger.LogInformation("AddShip on board {BoardId} was {Result}", boardId, result ? "successful" : "unsuccessful");
-        return result;
+
+        var logMsg = result
+            ? $"AddShip on board {boardId} was successful"
+            : $"AddShip on board {boardId} was unsuccessful";
+
+        _logger.LogInformation(logMsg);
+
+        return new AddShipResponse
+        {
+            Success = result,
+            Message = result ? "Ship added successfully." : "Failed to add ship (overlap or invalid position)."
+        };
     }
+
 
     public AttackResult? Attack(Guid boardId, Position pos)
     {
