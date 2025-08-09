@@ -62,8 +62,8 @@ The Battleship API uses JWT Bearer tokens to protect its `/api/*` endpoints. To 
 
      ```json
      {
-       "username": "user",
-       "password": "password"
+       "username": "battle",
+       "password": "ready"
      }
      ```
 
