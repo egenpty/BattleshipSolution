@@ -138,7 +138,7 @@ api.MapPost("/board/{id}/attack", (Guid id, Position pos, GameService service) =
 });
 
 // Read port from environment or default to 5000
-//var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
-//app.Urls.Add($"http://*:{port}");
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+app.Urls.Add($"http://*:{port}");
 
 app.Run();
